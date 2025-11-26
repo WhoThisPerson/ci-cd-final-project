@@ -7,6 +7,17 @@ spec:
   description: This task will clean up a workspace by deleting all the files.
   workspaces:
     - name: source
+
+
+  stepTemplate:
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1
+      capabilities:
+        drop: ["ALL"]
+      seccompProfile:
+        type: RuntimeDefault
+
   steps:
     - name: remove
       image: alpine:3
@@ -14,13 +25,6 @@ spec:
         - name: WORKSPACE_SOURCE_PATH
           value: $(workspaces.source.path)
       workingDir: $(workspaces.source.path)
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1
-        capabilities:
-          drop: ["ALL"]
-        seccompProfile:
-          type: RuntimeDefault
       script: |
         #!/usr/bin/env sh
         set -eu
@@ -30,7 +34,6 @@ spec:
           rm -rf "${WORKSPACE_SOURCE_PATH}"/.[!.]*
           rm -rf "${WORKSPACE_SOURCE_PATH}"/..?*
         fi
-
 ---
 apiVersion: tekton.dev/v1beta1
 kind: Task
